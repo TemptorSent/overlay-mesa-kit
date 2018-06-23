@@ -12,7 +12,7 @@ fi
 
 PYTHON_COMPAT=( python2_7 )
 
-inherit autotools llvm multilib-minimal python-any-r1 pax-utils ${GIT_ECLASS}
+inherit autotools eutils llvm multilib-minimal python-any-r1 pax-utils ${GIT_ECLASS}
 
 OPENGL_DIR="xorg-x11"
 
@@ -30,7 +30,6 @@ fi
 
 LICENSE="MIT"
 SLOT="0"
-RESTRICT="!bindist? ( bindist )"
 
 RADEON_CARDS="r100 r200 r300 r600 radeon radeonsi"
 VIDEO_CARDS="${RADEON_CARDS} freedreno i915 i965 imx intel nouveau vc4 virgl vivante vmware"
@@ -39,9 +38,9 @@ for card in ${VIDEO_CARDS}; do
 done
 
 IUSE="${IUSE_VIDEO_CARDS}
-	bindist +libglvnd +classic d3d9 debug +dri3 +egl +gallium +gbm gles1 gles2 unwind
+	+glvnd +classic d3d9 debug +dri3 +egl +gallium +gbm gles1 gles2 unwind
 	+llvm +nptl opencl osmesa pax_kernel openmax pic selinux vaapi valgrind
-	vdpau vulkan wayland xvmc xa"
+	vdpau vulkan wayland xvmc xa sensors"
 
 REQUIRED_USE="
 	d3d9?   ( dri3 gallium )
@@ -75,13 +74,11 @@ REQUIRED_USE="
 	video_cards_vmware? ( gallium )
 "
 
-LIBDRM_DEPSTRING=">=x11-libs/libdrm-2.4.89"
-# keep correct libdrm and dri2proto dep
+LIBDRM_DEPSTRING=">=x11-libs/libdrm-2.4.91"
 # keep blocks in rdepend for binpkg
 RDEPEND="
 	!<x11-base/xorg-server-1.7
-	!<=x11-proto/xf86driproto-2.0.3
-	libglvnd? ( media-libs/libglvnd[${MULTILIB_USEDEP}] )
+	glvnd? ( media-libs/libglvnd[${MULTILIB_USEDEP}] )
 	classic? ( app-eselect/eselect-mesa )
 	gallium? ( app-eselect/eselect-mesa )
 	>=app-eselect/eselect-opengl-1.3.0
@@ -94,6 +91,7 @@ RDEPEND="
 	>=x11-libs/libXxf86vm-1.1.3:=[${MULTILIB_USEDEP}]
 	>=x11-libs/libxcb-1.9.3:=[${MULTILIB_USEDEP}]
 	x11-libs/libXfixes:=[${MULTILIB_USEDEP}]
+	sensors? ( sys-apps/lm_sensors[${MULTILIB_USEDEP}] )
 	unwind? ( sys-libs/libunwind[${MULTILIB_USEDEP}] )
 	llvm? (
 		video_cards_radeonsi? (
@@ -107,7 +105,7 @@ RDEPEND="
 		)
 	)
 	opencl? (
-				app-eselect/eselect-opencl
+				dev-libs/ocl-icd
 				dev-libs/libclc
 				virtual/libelf:0=[${MULTILIB_USEDEP}]
 			)
@@ -154,7 +152,6 @@ LLVM_DEPSTR="
 		sys-devel/llvm:6[${MULTILIB_USEDEP}]
 		sys-devel/llvm:5[${MULTILIB_USEDEP}]
 		sys-devel/llvm:4[${MULTILIB_USEDEP}]
-		>=sys-devel/llvm-3.9.0:0[${MULTILIB_USEDEP}]
 	)
 	sys-devel/llvm:=[${MULTILIB_USEDEP}]
 "
@@ -223,15 +220,7 @@ DEPEND="${RDEPEND}
 	sys-devel/gettext
 	virtual/pkgconfig
 	valgrind? ( dev-util/valgrind )
-	>=x11-proto/dri2proto-2.8-r1:=[${MULTILIB_USEDEP}]
-	dri3? (
-		>=x11-proto/dri3proto-1.0:=[${MULTILIB_USEDEP}]
-		>=x11-proto/presentproto-1.0:=[${MULTILIB_USEDEP}]
-	)
-	>=x11-proto/glproto-1.4.17-r1:=[${MULTILIB_USEDEP}]
-	>=x11-proto/xextproto-7.2.1-r1:=[${MULTILIB_USEDEP}]
-	>=x11-proto/xf86driproto-2.1.1-r1:=[${MULTILIB_USEDEP}]
-	>=x11-proto/xf86vidmodeproto-2.3.1-r1:=[${MULTILIB_USEDEP}]
+	>=x11-base/xorg-proto-2018.4-r1
 	vulkan? (
 		$(python_gen_any_dep ">=dev-python/mako-0.7.3[\${PYTHON_USEDEP}]")
 	)
@@ -391,7 +380,7 @@ multilib_src_configure() {
 		--enable-dri \
 		--enable-glx \
 		--enable-shared-glapi \
-		$(use_enable !bindist texture-float) \
+		--enable-texture-float \
 		$(use_enable d3d9 nine) \
 		$(use_enable debug) \
 		$(use_enable dri3) \
@@ -401,10 +390,11 @@ multilib_src_configure() {
 		$(use_enable gles2) \
 		$(use_enable nptl glx-tls) \
 		$(use_enable unwind libunwind) \
-		$(use_enable libglvnd) \
+		$(use_enable glvnd libglvnd) \
+		$(use_enable opencl opencl-icd) \
+		$(use_enable sensors lmsensors) \
 		--enable-valgrind=$(usex valgrind auto no) \
 		--enable-llvm-shared-libs \
-		--disable-opencl-icd \
 		--with-dri-drivers=${DRI_DRIVERS} \
 		--with-gallium-drivers=${GALLIUM_DRIVERS} \
 		--with-vulkan-drivers=${VULKAN_DRIVERS} \
@@ -474,10 +464,6 @@ multilib_src_install_all() {
 	find "${ED}" -name '*.la' -delete
 	einstalldocs
 
-	if use !bindist; then
-		dodoc docs/patents.txt
-	fi
-
 	# Install config file for eselect mesa
 	insinto /usr/share/mesa
 	newins "${FILESDIR}/eselect-mesa.conf.9.2" eselect-mesa.conf
@@ -506,7 +492,8 @@ pkg_postinst() {
 
 	# Switch to mesa opencl
 	if use opencl; then
-		eselect opencl set --use-old ${PN}
+		einfo "Make sure you have the ocl-icd OpenCL dispatcher enabled:"
+		einfo "    # eselect opencl set --use-old ocl-icd"
 	fi
 
 	# run omxregister-bellagio to make the OpenMAX drivers known system-wide
@@ -516,13 +503,6 @@ pkg_postinst() {
 			OMX_BELLAGIO_REGISTRY=${EPREFIX}/usr/share/mesa/xdg/.omxregister \
 			omxregister-bellagio
 		eend $?
-	fi
-
-	# warn about patent encumbered texture-float
-	if use !bindist; then
-		elog "USE=\"bindist\" was not set. Potentially patent encumbered code was"
-		elog "enabled. Please see /usr/share/doc/${P}/patents.txt.bz2 for an"
-		elog "explanation."
 	fi
 }
 
