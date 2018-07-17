@@ -39,7 +39,7 @@ done
 
 IUSE="${IUSE_VIDEO_CARDS}
 	+glvnd +classic d3d9 debug +dri3 +egl +gallium +gbm gles1 gles2 unwind
-	+llvm +nptl opencl osmesa pax_kernel openmax pic selinux vaapi valgrind
+	+llvm +nptl opencl +ocl-icd osmesa pax_kernel openmax pic selinux vaapi valgrind
 	vdpau vulkan wayland xvmc xa sensors"
 
 REQUIRED_USE="
@@ -105,7 +105,8 @@ RDEPEND="
 		)
 	)
 	opencl? (
-				dev-libs/ocl-icd
+			ocl-icd? ( dev-libs/ocl-icd )
+			!ocl-icd? ( app-eselect/eselect-opencl )
 				dev-libs/libclc
 				virtual/libelf:0=[${MULTILIB_USEDEP}]
 			)
@@ -458,6 +459,7 @@ multilib_src_install() {
 	fi
 
 	find "${ED}/usr/$(get_libdir)/" -name 'libGLESv[12]*.so*' -delete
+	find "${ED}/usr/$(get_libdir)/pkgconfig/" -name 'gl.pc' -delete
 }
 
 multilib_src_install_all() {
