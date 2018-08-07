@@ -78,7 +78,7 @@ IUSE="${IUSE_VIDEO_CARDS}
 	+dri3 +gbm
 	+llvm +shader-cache
 	osmesa d3d9
-	hud sensors
+	extra-hud sensors
 	pax_kernel pic selinux
 	debug unwind valgrind
 	test"
@@ -426,7 +426,7 @@ multilib_src_configure() {
 		#-Ddri-search-path=
 
 		-Dgallium-drivers=${GALLIUM_DRIVERS}
-		-Dgallium-extra-hud=$(usex hud true false)
+		-Dgallium-extra-hud=$(usex extra-hud true false)
 
 		-Dgallium-vdpau=$(usex vdpau true false)
 		$(use vdpau && printf -- "-Dvdpau-libs-path=${EPREFIX}/usr/$(get_libdir)/${P}/vdpau")
