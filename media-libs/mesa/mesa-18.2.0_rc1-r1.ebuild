@@ -403,7 +403,7 @@ multilib_src_configure() {
 	platform_enable android android
 	platform_enable haiku haiku
 
-
+	# Enable supported arches for OpenSWR based on cpu_flags_x86_*
 	for swr_arch in ${ALL_SWR_ARCHES} ; do
 		case "${swr_arch}" in
 			knl) swr_cpuflag=avx512er ;;
@@ -415,38 +415,45 @@ multilib_src_configure() {
 			SWR_ARCHES+="${SWR_ARCHES:+,}${swr_arch}"
 		fi
 	done
-		
+
+
+	local my_prefix="${EPREFIX}/usr/$(get_libdir)/${P}"
+	local my_libdir="${my_prefix}/lib"
 
 	local emesonargs=(
+		-Dprefix="${my_prefix}"
+		-Dlibdir="${my_libdir}"
+
 		-Dplatforms=${PLATFORMS}
+
 		-Ddri3=$(usex dri3 true false)
 
 		-Ddri-drivers=${DRI_DRIVERS}
-		-Ddri-drivers-path=${EPREFIX}/usr/$(get_libdir)/${P}/dri
+		#-Ddri-drivers-path=${my_prefix}/dri
 		#-Ddri-search-path=
 
 		-Dgallium-drivers=${GALLIUM_DRIVERS}
 		-Dgallium-extra-hud=$(usex extra-hud true false)
 
 		-Dgallium-vdpau=$(usex vdpau true false)
-		$(use vdpau && printf -- "-Dvdpau-libs-path=${EPREFIX}/usr/$(get_libdir)/${P}/vdpau")
+		#$(use vdpau && printf -- "-Dvdpau-libs-path=${my_prefix}/vdpau")
 
 		-Dgallium-xvmc=$(usex xvmc true false)
 		-Dxvmc-libs-path=
 
 		-Dgallium-omx=$(usex openmax bellagio disabled)
-		$(use openmax && printf -- "-Domx-libs-path=${EPREFIX}/usr/$(get_libdir)/${P}/omx")
+		#$(use openmax && printf -- "-Domx-libs-path=${my_prefix}/omx")
 
 		-Dgallium-va=$(usex vaapi true false)
-		$(use vaapi && printf -- "-Dva-libs-path=${EPREFIX}/usr/$(get_libdir)/${P}/va/drivers")
+		#$(use vaapi && printf -- "-Dva-libs-path=${my_prefix}/va/drivers")
 
 		-Dgallium-nine=$(usex d3d9 true false)
-		$(use d3d9 && printf -- "-Dd3d-drivers-path=${EPREFIX}/usr/$(get_libdir)/${P}/d3d")
+		#$(use d3d9 && printf -- "-Dd3d-drivers-path=${my_prefix}/d3d")
 
 		-Dgallium-opencl=$(usex opencl $(usex ocl-icd icd standalone) disabled)
 
 		-Dvulkan-drivers=${VULKAN_DRIVERS}
-		$(use vulkan && printf -- "-Dvulkan-icd-dir=${EPREFIX}/usr/$(get_libdir)/${P}/vulkan")
+		#$(use vulkan && printf -- "-Dvulkan-icd-dir=${my_prefix}/vulkan")
 
 		-Dshader-cache=$(usex shader-cache true false)
 
@@ -483,7 +490,35 @@ multilib_src_configure() {
 
 	use userland_GNU || export INDENT=cat
 
-	meson_src_configure
+	# We can't actually use meson_src_configure because it hard-codes the buildtype, prefix, libdir, etc.
+	# meson_src_configure
+
+	# Common args -- This is where we need to override:
+	local mesonargs=(
+			--buildtype plain
+			--libdir "${my_libdir}"
+			--localstatedir "${EPREFIX}/var/lib"
+			--sharedstatedir "${EPREFIX}/usr/share/${P}"
+			--prefix "${my_prefix}"
+			--wrap-mode nodownload
+			)
+
+	if tc-is-cross-compiler || [[ ${ABI} != ${DEFAULT_ABI-${ABI}} ]]; then
+			_meson_create_cross_file || die "unable to write meson cross file"
+			mesonargs+=( --cross-file "${T}/meson.${CHOST}.${ABI}" )
+	fi
+
+	# https://bugs.gentoo.org/625396
+	python_export_utf8_locale
+
+	# Append additional arguments from ebuild
+	mesonargs+=("${emesonargs[@]}")
+
+	BUILD_DIR="${BUILD_DIR:-${WORKDIR}/${P}-build}"
+	set -- meson "${mesonargs[@]}" "$@" \
+			"${EMESON_SOURCE:-${S}}" "${BUILD_DIR}"
+	echo "$@"
+	tc-env_build "$@" || die
 }
 
 multilib_src_compile() {
@@ -495,10 +530,10 @@ multilib_src_install() {
 	meson_src_install DESTDIR="${D}"
 
 	# Cleanup files we shouldn't be installing when using libglvnd
-	if use glvnd ; then 
-		find "${ED}/usr/$(get_libdir)/" -name 'libGLESv[12]*.so*' -delete
-		find "${ED}/usr/$(get_libdir)/pkgconfig/" -name 'gl.pc' -delete
-	fi
+	#if use glvnd ; then 
+	#	find "${ED}/usr/$(get_libdir)/" -name 'libGLESv[12]*.so*' -delete
+	#	find "${ED}/usr/$(get_libdir)/pkgconfig/" -name 'gl.pc' -delete
+	#fi
 }
 
 multilib_src_install_all() {
@@ -506,8 +541,8 @@ multilib_src_install_all() {
 	einstalldocs
 
 	# Install config file for eselect mesa
-	insinto /usr/share/mesa
-	newins "${FILESDIR}/eselect-mesa.conf.9.2" eselect-mesa.conf
+	#insinto /usr/share/mesa
+	#newins "${FILESDIR}/eselect-mesa.conf.9.2" eselect-mesa.conf
 }
 
 multilib_src_test() {
@@ -524,7 +559,7 @@ multilib_src_test() {
 pkg_postinst() {
 
 	if use openmax; then
-		echo "XDG_DATA_DIRS=\"${EPREFIX}/usr/share/mesa/xdg\"" > "${T}/99mesaxdgomx"
+		echo "XDG_DATA_DIRS=\"${EPREFIX}/usr/share/${P}/xdg\"" > "${T}/99mesaxdgomx"
 		doenvd "${T}"/99mesaxdgomx
 		keepdir /usr/share/mesa/xdg
 	fi
@@ -543,8 +578,8 @@ pkg_postinst() {
 	# run omxregister-bellagio to make the OpenMAX drivers known system-wide
 	if use openmax; then
 		ebegin "Registering OpenMAX drivers"
-		BELLAGIO_SEARCH_PATH="${EPREFIX}/usr/$(get_libdir)/libomxil-bellagio0" \
-			OMX_BELLAGIO_REGISTRY=${EPREFIX}/usr/share/mesa/xdg/.omxregister \
+		BELLAGIO_SEARCH_PATH="${EPREFIX}/usr/$(get_libdir)/${P}/libomxil-bellagio0" \
+			OMX_BELLAGIO_REGISTRY=${EPREFIX}/usr/share/${P}/xdg/.omxregister \
 			omxregister-bellagio
 		eend $?
 	fi
@@ -552,7 +587,7 @@ pkg_postinst() {
 
 pkg_prerm() {
 	if use openmax; then
-		rm "${EPREFIX}"/usr/share/mesa/xdg/.omxregister
+		rm "${EPREFIX}"/usr/share/${P}/xdg/.omxregister
 	fi
 }
 
