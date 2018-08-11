@@ -51,23 +51,41 @@ RDEPEND=" || (
 )"
 DEPEND="\${RDEPEND}"
 
+S="\${WORKDIR}"
+
 multilib_src_configure() { return 0; }
+src_configure() { return 0; }
 multilib_src_compile() { return 0; }
+src_compile() { return 0; }
 multilib_src_install() { return 0; }
+src_install() { return 0; }
 
 EOF
 
 	ebuild "${protoebuild}" manifest
 	done
+	al=""
+	a=""
+	for pl in ${pkgs_legacy} ; do al="${al}${al:+ }x11-proto/${pl}${STUBREV}" ; done
+	for p in ${pkgs} ; do a="${a}${a:+ }x11-proto/${p}${STUBREV}" ; done
 
 	
 	printf -- "\nUpdating '${eb}'.\n"
+	sed -e '/LEGACY_BLOCKS="/,/"/ d ; /RDEPEND="/,/"/ d ' -i "${eb}"
+
+	printf -- "LEGACY_BLOCKS=\"" >> "${eb}"
+	for pl in ${al} ; do printf -- "\n\t!<${pl}" >> "${eb}" ; done
+	printf -- '"\n' >> "${eb}"
+	printf -- "RDEPEND=\"legacy? ( \${LEGACY_BLOCKS} )" >> "${eb}"
+	for p in ${a} ; do printf -- "\n\t!<${p}" >> "${eb}" ; done
+	printf -- '"\n' >> "${eb}"
+
 	sed -e '/LEGACY_DEPS="/,/"/ d ; /PDEPEND="/,/"/ d ' -i "${eb}"
 	printf -- "LEGACY_DEPS=\"" >> "${eb}"
-	for pl in ${pkgs_legacy} ; do printf -- "\n\t=x11-proto/${pl}${STUBREV}[\${MULTILIB_USEDEP}]" >> "${eb}" ; done
+	for pl in ${al} ; do printf -- "\n\t=${pl}[\${MULTILIB_USEDEP}]" >> "${eb}" ; done
 	printf -- '"\n' >> "${eb}"
 	printf -- "PDEPEND=\"legacy? ( \${LEGACY_DEPS} )" >> "${eb}"
-	for p in ${pkgs} ; do printf -- "\n\t=x11-proto/${p}${STUBREV}[\${MULTILIB_USEDEP}]" >> "${eb}" ; done
+	for p in ${a} ; do printf -- "\n\t=${p}[\${MULTILIB_USEDEP}]" >> "${eb}" ; done
 	printf -- '"\n' >> "${eb}"
 
 	ebuild "${eb}" manifest
