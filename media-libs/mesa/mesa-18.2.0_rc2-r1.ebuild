@@ -321,6 +321,10 @@ pkg_setup() {
 
 src_prepare() {
 	[[ ${PV} == 9999 ]] && eautoreconf
+
+	# Fix gl.pc.in when using libglvnd to always link using -lGL
+	use glvnd && sed -e 's/-l@GL_LIB@/-lGL/' -i src/mesa/gl.pc.in
+
 	eapply_user
 }
 
@@ -493,7 +497,7 @@ multilib_src_configure() {
 		-Dosmesa-bits=8
 
 		-Dswr-arches=${SWR_ARCHES}
-		#-Dtools=
+		-Dtools=${TOOLS}
 		#-Dpower8=
 		#-Dxlib-lease=
 	)
