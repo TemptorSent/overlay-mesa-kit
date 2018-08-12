@@ -33,6 +33,7 @@ IUSE="legacy"
 
 multilib_src_configure() {
 	local emesonargs=(
+		--datadir="${EPREFIX}/usr/$(get_libdir)"
 		-Dlegacy=$(usex legacy true false)
 	)
 	meson_src_configure
@@ -45,6 +46,17 @@ multilib_src_compile() {
 multilib_src_install() {
 	meson_src_install
 }
+
+multilib_src_install_all() {
+	DOCS=(
+		AUTHORS
+		PM_spec
+		$(set +f; echo COPYING-*)
+		$(set +f; echo *.txt | grep -v meson.txt)
+	)
+	einstalldocs
+}
+
 LEGACY_BLOCKS="
 	!<x11-proto/evieproto-1.1.1-r10
 	!<x11-proto/fontcacheproto-0.1.3-r10
