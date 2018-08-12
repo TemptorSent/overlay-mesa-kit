@@ -3,13 +3,16 @@
 OUTDIR="../../x11-proto"
 STUBREV="-r10"
 
+xp_manifest=""
+
 for eb in xorg-proto-*.ebuild ; do
 	ppkg="${eb/%.ebuild/}"
 	ppkg="${ppkg##*/}"
 	ppkgver="${ppkg#xorg-proto-}"
-
-	ebuild "${eb}" manifest
-	ebuild "${eb}" unpack
+	
+	# We only need to generate the manifest for xorg-proto once.
+	[ -z "$xp_manifest" ] && ( ebuild "${eb}" manifest 2>&1 ) > /dev/null && xp_manifest="${eb}"
+	ebuild "${eb}" clean unpack
 
 	pushd ~portage/x11-base/${ppkg}/work
 		if [ -d "${ppkg}" ] ; then cd "${ppkg}"
@@ -27,6 +30,7 @@ for eb in xorg-proto-*.ebuild ; do
 		protodir="${OUTDIR}/${protoname}"
 		mkdir -p "${protodir}"
 		protoebuild="${protodir}/${proto}${STUBREV}.ebuild"
+		# If we've already created the stub, add the current xorg-proto as a provider and continue from the top.
 		if [ -e "${protoebuild}" ] && ! grep -q "x11-base/${ppkg}" "${protoebuild}" ; then
 			printf -- "Adding ${ppkg} as provider to ebuild '${protoebuild}'.\n"
 			sed -e 's:RDEPEND=" || (:&\n\t=x11-base/'"${ppkg}:" -i "${protoebuild}"
@@ -40,7 +44,7 @@ EAPI=6
 
 inherit multilib-minimal
 
-DESCRIPTION="X.Org Protocol ${proto} package stub (provided by ${ppkg%${ppkgver}})."
+DESCRIPTION="X.Org Protocol ${proto} package stub (provided by ${ppkg%-${ppkgver}})."
 
 KEYWORDS="*"
 
@@ -62,7 +66,7 @@ src_install() { return 0; }
 
 EOF
 
-	ebuild "${protoebuild}" manifest
+		ebuild "${protoebuild}" manifest
 	done
 	al=""
 	a=""
