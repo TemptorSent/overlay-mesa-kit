@@ -81,6 +81,7 @@ IUSE="${IUSE_VIDEO_CARDS}
 	extra-hud sensors
 	pax_kernel pic selinux
 	debug unwind valgrind
+	alternate-path
 	test"
 
 REQUIRED_USE_APIS="
@@ -431,13 +432,18 @@ multilib_src_configure() {
 		fi
 	done
 
-
-	local my_prefix="${EPREFIX}/usr/$(get_libdir)/${P}"
-	local my_libdir="${my_prefix}/lib"
+	# Setup for alternate install paths
+	if use alternate-path ; then
+		local my_prefix="${EPREFIX}/usr/$(get_libdir)/${P}"
+		local my_libdir="lib"
+	else
+		local my_prefix="${EPREFIX}/usr"
+		local my_libdir="$(get_libdir)"
+	fi
 
 	local emesonargs=(
-		-Dprefix="${my_prefix}"
-		-Dlibdir="${my_libdir}"
+		--prefix="${my_prefix}"
+		--libdir="${my_libdir}"
 
 		-Dplatforms=${PLATFORMS}
 
@@ -505,6 +511,7 @@ multilib_src_configure() {
 
 	use userland_GNU || export INDENT=cat
 
+
 	# We can't actually use meson_src_configure because it hard-codes the buildtype, prefix, libdir, etc.
 	# meson_src_configure
 
@@ -545,10 +552,10 @@ multilib_src_install() {
 	meson_src_install DESTDIR="${D}"
 
 	# Cleanup files we shouldn't be installing when using libglvnd
-	#if use glvnd ; then 
-	#	find "${ED}/usr/$(get_libdir)/" -name 'libGLESv[12]*.so*' -delete
+	if use glvnd ; then 
+		find "${ED}/usr/$(get_libdir)/" -name 'libGLESv[12]*.so*' -delete
 	#	find "${ED}/usr/$(get_libdir)/pkgconfig/" -name 'gl.pc' -delete
-	#fi
+	fi
 }
 
 multilib_src_install_all() {
