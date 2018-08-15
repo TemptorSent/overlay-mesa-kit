@@ -62,7 +62,7 @@ IUSE_DRIVER_OPTS="i915_classic_driver swrast_classic_driver nouveau_classic_driv
 
 IUSE_GL="+glvnd +opengl +glx +egl +gles1 +gles2"
 IUSE_PLATFORMS="+X +drm wayland +surfaceless android haiku"
-IUSE_VULKAN="+vulkan"
+IUSE_VULKAN="+vulkan +xlib_lease"
 IUSE_CL="opencl +ocl-icd"
 IUSE_MEDIA="vaapi vdpau xvmc xa openmax"
 
@@ -159,12 +159,16 @@ RDEPEND="
 		>=x11-libs/libXxf86vm-1.1.3:=[${MULTILIB_USEDEP}]
 		>=x11-libs/libxshmfence-1.1:=[${MULTILIB_USEDEP}]
 		drm? ( >=x11-proto/dri2proto-2.8:=[${MULTILIB_USEDEP}] )
-		>=x11-proto/glproto-1.4.13:=[${MULTILIB_USEDEP}]
+		>=x11-proto/glproto-1.4.14:=[${MULTILIB_USEDEP}]
+		xlib_lease? (
+			>=x11-libs/libXrandr-1.3:=[${MULTILIB_USEDEP}]
+			>=x11-libs/libxcb-1.13:=[${MULTILIB_USEDEP}]
+		)
 	)
 
 	wayland? (
-		>=dev-libs/wayland-protocols-1.8
-		>=dev-libs/wayland-1.11.0:=[${MULTILIB_USEDEP}]
+		>=dev-libs/wayland-protocols-1.15
+		>=dev-libs/wayland-1.15.0:=[${MULTILIB_USEDEP}]
 	)
 
 	sensors? ( sys-apps/lm_sensors[${MULTILIB_USEDEP}] )
@@ -192,6 +196,7 @@ RDEPEND="
 	)
 	vdpau? ( >=x11-libs/libvdpau-1.1:=[${MULTILIB_USEDEP}] )
 	xvmc? ( >=x11-libs/libXvMC-1.0.8:=[${MULTILIB_USEDEP}] )
+
 	${LIBDRM_DEPSTRING}[video_cards_freedreno?,video_cards_nouveau?,video_cards_vc4?,video_cards_vivante?,video_cards_vmware?,${MULTILIB_USEDEP}]
 
 	video_cards_i915? ( ${LIBDRM_DEPSTRING}[video_cards_intel] )
@@ -296,8 +301,7 @@ x86? (
 
 llvm_check_deps() {
 	local flags=${MULTILIB_USEDEP}
-	if use video_cards_r600 || use video_cards_radeonsi
-	then
+	if use video_cards_r600 || use video_cards_radeonsi ; then
 		flags+=",llvm_targets_AMDGPU(-)"
 	fi
 
@@ -507,7 +511,7 @@ multilib_src_configure() {
 		-Dswr-arches=${SWR_ARCHES}
 		-Dtools=${TOOLS}
 		#-Dpower8=
-		#-Dxlib-lease=
+		-Dxlib-lease=$(usex xlib_lease true false)
 	)
 
 	if use llvm ; then
@@ -542,8 +546,7 @@ multilib_src_configure() {
 	# Append additional arguments from ebuild
 	mesonargs+=("${emesonargs[@]}")
 
-	set -- meson \
-			"${EMESON_SOURCE:-${S}}" "${BUILD_DIR}" "${meson_cross[@]}" "${mesonargs[@]}"
+	set -- meson "${EMESON_SOURCE:-${S}}" "${BUILD_DIR}" "${meson_cross[@]}" "${mesonargs[@]}"
 	echo "$@"
 	tc-env_build "$@" || die
 }
