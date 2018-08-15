@@ -12,7 +12,7 @@ fi
 
 PYTHON_COMPAT=( python2_7 )
 
-inherit meson eutils llvm multilib-minimal python-any-r1 pax-utils ${GIT_ECLASS}
+inherit meson eutils llvm python-any-r1 pax-utils ${GIT_ECLASS} multilib-minimal
 
 OPENGL_DIR="xorg-x11"
 
@@ -327,6 +327,8 @@ src_prepare() {
 	use glvnd && sed -e 's/-l@GL_LIB@/-lGL/' -i src/mesa/gl.pc.in
 
 	eapply_user
+
+	export OLD_PATH="${PATH}"
 }
 
 multilib_src_configure() {
@@ -460,7 +462,7 @@ multilib_src_configure() {
 		#$(use vdpau && printf -- "-Dvdpau-libs-path=${my_prefix}/vdpau")
 
 		-Dgallium-xvmc=$(usex xvmc true false)
-		-Dxvmc-libs-path=
+		#-Dxvmc-libs-path=
 
 		-Dgallium-omx=$(usex openmax bellagio disabled)
 		#$(use openmax && printf -- "-Domx-libs-path=${my_prefix}/omx")
@@ -508,6 +510,9 @@ multilib_src_configure() {
 		#-Dxlib-lease=
 	)
 
+	if use llvm ; then
+		export LLVM_CONFIG="$(llvm-config --prefix)/bin/${CHOST}-llvm-config"
+	fi
 
 	use userland_GNU || export INDENT=cat
 
@@ -525,10 +530,11 @@ multilib_src_configure() {
 			--wrap-mode nodownload
 			)
 
-	if tc-is-cross-compiler || [[ ${ABI} != ${DEFAULT_ABI-${ABI}} ]]; then
+	
+	#if tc-is-cross-compiler || [[ ${ABI} != ${DEFAULT_ABI-${ABI}} ]]; then
 			_meson_create_cross_file || die "unable to write meson cross file"
-			mesonargs+=( --cross-file "${T}/meson.${CHOST}.${ABI}" )
-	fi
+			meson_cross=( --cross-file "${T}/meson.${CHOST}.${ABI}" )
+	#fi
 
 	# https://bugs.gentoo.org/625396
 	python_export_utf8_locale
@@ -536,15 +542,15 @@ multilib_src_configure() {
 	# Append additional arguments from ebuild
 	mesonargs+=("${emesonargs[@]}")
 
-	BUILD_DIR="${BUILD_DIR:-${WORKDIR}/${P}-build}"
-	set -- meson "${mesonargs[@]}" "$@" \
-			"${EMESON_SOURCE:-${S}}" "${BUILD_DIR}"
+	set -- meson \
+			"${EMESON_SOURCE:-${S}}" "${BUILD_DIR}" "${meson_cross[@]}" "${mesonargs[@]}"
 	echo "$@"
 	tc-env_build "$@" || die
 }
 
 multilib_src_compile() {
-	meson_src_compile
+	eninja -C "${BUILD_DIR}"
+
 }
 
 
