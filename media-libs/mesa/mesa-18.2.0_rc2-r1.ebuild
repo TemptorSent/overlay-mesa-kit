@@ -55,7 +55,7 @@ ALL_VULKAN_DRIVERS="amd intel"
 ALL_VULKAN_CARDS="video_cards_radeonsi video_cards_i965"
 
 ALL_SWR_ARCHES="avx avx2 knl skx"
-IUSE_CPUFLAGS="cpu_flags_x86_avx cpu_flags_x86_avx2 cpu_flags_x86_avx512er cpu_flags_x86_avx512bw"
+IUSE_SWR_CPUFLAGS="cpu_flags_x86_avx cpu_flags_x86_avx2 cpu_flags_x86_avx512er cpu_flags_x86_avx512bw"
 
 IUSE_VIDEO_CARDS="${ALL_DRI_CARDS} ${ALL_GALLIUM_CARDS}"
 IUSE_DRIVER_OPTS="i915_classic_driver swrast_classic_driver nouveau_classic_driver"
@@ -74,7 +74,7 @@ IUSE="${IUSE_VIDEO_CARDS}
 	${IUSE_PLATFORMS}
 	${IUSE_CL}
 	${IUSE_MEDIA}
-	${IUSE_CPUFLAGS}
+	${IUSE_SWR_CPUFLAGS}
 	+dri3 +gbm
 	+llvm +shader-cache
 	osmesa d3d9
@@ -630,13 +630,13 @@ dri_enable() {
 	case $# in
 		# for enabling unconditionally
 		1)
-			DRI_DRIVERS+=",$1"
+			DRI_DRIVERS+="${DRI_DRIVERS:+,}$1"
 			;;
 		*)
 			if use $1; then
 				shift
 				for i in $@; do
-					DRI_DRIVERS+=",${i}"
+					DRI_DRIVERS+="${DRI_DRIVERS:+,}${i}"
 				done
 			fi
 			;;
@@ -653,7 +653,7 @@ gallium_enable() {
 			if use $1; then
 				shift
 				for i in $@; do
-					GALLIUM_DRIVERS+="${GALLIUM_DRIVERS:+,},${i}"
+					GALLIUM_DRIVERS+="${GALLIUM_DRIVERS:+,}${i}"
 				done
 			fi
 			;;
