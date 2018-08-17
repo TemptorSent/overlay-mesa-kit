@@ -305,6 +305,7 @@ x86? (
 llvm_check_deps() {
 	local flags=${MULTILIB_USEDEP}
 	if use video_cards_r600 || use video_cards_radeonsi ; then
+		use vulkan && [ $LLVM_SLOT = 6 ] && return 1
 		flags+=",llvm_targets_AMDGPU(-)"
 	fi
 
