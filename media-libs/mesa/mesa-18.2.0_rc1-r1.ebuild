@@ -131,6 +131,8 @@ REQUIRED_USE="
 	wayland? ( egl gbm )
 
 	!swrast_classic_driver? ( llvm )
+	video_cards_swr? ( || ( ${IUSE_SWR_CPUFLAGS} ))
+
 	video_cards_imx?    ( video_cards_vivante )
 	video_cards_tegra? ( video_cards_nouveau !nouveau_classic_driver )
 	video_cards_r300?   ( x86? ( llvm ) amd64? ( llvm ) )
@@ -222,7 +224,8 @@ RDEPEND="${RDEPEND}
 LLVM_DEPSTR="
 	|| (
 		sys-devel/llvm:7[${MULTILIB_USEDEP}]
-		sys-devel/llvm:6[${MULTILIB_USEDEP}]
+		!video_cards_radeonsi ( sys-devel/llvm:6[${MULTILIB_USEDEP}] )
+		video_cards_radeonsi ( !vulkan ( sys-devel/llvm:6[${MULTILIB_USEDEP}] ) )
 		sys-devel/llvm:5[${MULTILIB_USEDEP}]
 	)
 	sys-devel/llvm:=[${MULTILIB_USEDEP}]
