@@ -522,7 +522,7 @@ multilib_src_configure() {
 	)
 
 	if use llvm ; then
-		export LLVM_CONFIG="$(llvm-config --prefix)/bin/${CHOST}-llvm-config"
+		export LLVM_CONFIG="$(llvm-config --prefix)/bin/$(get_abi_CHOST)-llvm-config"
 	fi
 
 	use userland_GNU || export INDENT=cat
@@ -544,7 +544,7 @@ multilib_src_configure() {
 	
 	#if tc-is-cross-compiler || [[ ${ABI} != ${DEFAULT_ABI-${ABI}} ]]; then
 			_meson_create_cross_file || die "unable to write meson cross file"
-			meson_cross=( --cross-file "${T}/meson.${CHOST}.${ABI}" )
+			meson_cross=( --cross-file "${T}/meson.$(get_abi_CHOST).${ABI}" )
 	#fi
 
 	# https://bugs.gentoo.org/625396
