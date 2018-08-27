@@ -156,7 +156,10 @@ RDEPEND="
 		>=x11-libs/libXext-1.3.2:=[${MULTILIB_USEDEP}]
 		>=x11-libs/libXdamage-1.1.4-r1:=[${MULTILIB_USEDEP}]
 		x11-libs/libXfixes:=[${MULTILIB_USEDEP}]
-		dri3? ( >=x11-libs/libxcb-1.13:=[${MULTILIB_USEDEP}] )
+		dri3? (
+			>=x11-libs/libxcb-1.13:=[${MULTILIB_USEDEP}]
+			>=x11-base/xcb-proto-1.13:=[${MULTILIB_USEDEP}]
+		)
 		!dri3? ( >=x11-libs/libxcb-1.9.3:=[${MULTILIB_USEDEP}] )
 		>=x11-libs/libXxf86vm-1.1.3:=[${MULTILIB_USEDEP}]
 		>=x11-libs/libxshmfence-1.1:=[${MULTILIB_USEDEP}]
@@ -164,6 +167,7 @@ RDEPEND="
 		>=x11-proto/glproto-1.4.14:=[${MULTILIB_USEDEP}]
 		xlib_lease? (
 			>=x11-libs/libXrandr-1.3:=[${MULTILIB_USEDEP}]
+			>=x11-base/xcb-proto-1.13:=[${MULTILIB_USEDEP}]
 			>=x11-libs/libxcb-1.13:=[${MULTILIB_USEDEP}]
 		)
 	)
