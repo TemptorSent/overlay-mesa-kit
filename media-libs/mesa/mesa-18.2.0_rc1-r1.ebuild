@@ -533,7 +533,7 @@ multilib_src_configure() {
 
 	# Common args -- This is where we need to override:
 	local mesonargs=(
-			--buildtype plain
+			--buildtype release
 			--libdir "${my_libdir}"
 			--localstatedir "${EPREFIX}/var/lib"
 			--sharedstatedir "${EPREFIX}/usr/share/${P}"
