@@ -3,24 +3,33 @@
 
 EAPI=6
 
-EGIT_REPO_URI="https://github.com/NVIDIA/${PN}.git"
-
-if [[ ${PV} = 9999* ]]; then
-	GIT_ECLASS="git-r3"
-fi
 
 PYTHON_COMPAT=( python2_7 )
-inherit autotools ${GIT_ECLASS} multilib-minimal python-any-r1
+
+
+
+inherit autotools multilib-minimal python-any-r1
 
 DESCRIPTION="The GL Vendor-Neutral Dispatch library"
 HOMEPAGE="https://github.com/NVIDIA/libglvnd"
-if [[ ${PV} = 9999* ]]; then
+EGIT_REPO_URI="${HOMEPAGE}.git"
+SRC_URI="${HOMEPAGE}/releases/download/v${PV}/${P}.tar.gz"
+
+PV_L=${PV##*.}
+if [ ${PV_L} -gt 9000 ] ; then
+	inherit git-r3
+	if [ ${PV_L} -gt 19000101 ] ; then
+		CD_YYYY="${PV_L%????}"
+		CD_DD="${PV_L#??????}"
+		CD_MM="${PV_L#${CD_YYYY}}"
+		CD_MM="${CD_MM%${CD_DD}}"
+
+		EGIT_COMMIT_DATE="${CD_YYYY}-${CD_MM}-${CD_DD}"
+	fi
 	SRC_URI=""
 else
-	KEYWORDS="~amd64"
-	COMMIT="9d909106f232209cf055428cae18387c18918704"
-	SRC_URI="https://github.com/NVIDIA/${PN}/archive/${COMMIT}.tar.gz -> ${P}.tar.gz"
-	S=${WORKDIR}/${PN}-${COMMIT}
+	KEYWORDS="*"
+	EGIT_REPO_URI=""
 fi
 
 LICENSE="MIT"
@@ -41,7 +50,7 @@ DEPEND="
 
 src_unpack() {
 	default
-	[[ $PV = 9999* ]] && git-r3_src_unpack
+	[ -n "${EGIT_REPO_URI}" ] && git-r3_src_unpack
 }
 
 src_prepare() {
@@ -57,6 +66,5 @@ multilib_src_install() {
 	default
 	# libglvnd should replace existing Mesa gl if present
 	PKGCONF_PATH="${ED}/usr/$(get_libdir)/pkgconfig"
-	ln -fs "${PKGCONF_PATH}/libglvnd.pc" "${PKGCONF_PATH}/gl.pc" || die
 	find "${ED}" -name '*.la' -delete || die
 }
