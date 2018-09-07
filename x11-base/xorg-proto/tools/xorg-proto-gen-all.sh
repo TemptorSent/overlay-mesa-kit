@@ -1,7 +1,7 @@
 #!/bin/sh
 
 OUTDIR="../../x11-proto"
-STUBREV="-r10"
+STUBREV="-r1000"
 
 xp_manifest=""
 

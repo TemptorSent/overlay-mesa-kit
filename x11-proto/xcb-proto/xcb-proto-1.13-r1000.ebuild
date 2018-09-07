@@ -3,13 +3,13 @@ EAPI=6
 
 inherit multilib-minimal
 
-DESCRIPTION="XCB Protocol package stub (provided by x11-base/xcb-proto)."
+DESCRIPTION="x11-proto/xcb-proto package stub (provided by xcb-proto)."
 
 KEYWORDS="*"
 
 SLOT="0"
 
-RDEPEND="x11-base/xcb-proto"
+RDEPEND="=x11-base/xcb-proto-1.13[${MULTILIB_USEDEP}]"
 DEPEND="${RDEPEND}"
 
 S="${WORKDIR}"
