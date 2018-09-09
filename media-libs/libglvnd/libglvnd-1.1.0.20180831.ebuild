@@ -25,6 +25,7 @@ if [ ${PV_L} -gt 9000 ] ; then
 		CD_MM="${CD_MM%${CD_DD}}"
 
 		EGIT_COMMIT_DATE="${CD_YYYY}-${CD_MM}-${CD_DD}"
+		KEYWORDS="*"
 	fi
 	SRC_URI=""
 else
@@ -32,6 +33,7 @@ else
 	EGIT_REPO_URI=""
 fi
 
+KEYWORDS="*"
 LICENSE="MIT"
 SLOT="0"
 IUSE="+asm +glx gles egl"
