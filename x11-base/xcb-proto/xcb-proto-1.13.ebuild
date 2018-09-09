@@ -20,6 +20,7 @@ IUSE=""
 
 RDEPEND="${PYTHON_DEPS}"
 DEPEND="${RDEPEND}
+	!<x11-proto/${P}-r1000
 	dev-libs/libxml2"
 
 REQUIRED_USE="${PYTHON_REQUIRED_USE}"
