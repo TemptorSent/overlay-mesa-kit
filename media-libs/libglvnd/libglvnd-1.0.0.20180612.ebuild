@@ -36,7 +36,7 @@ fi
 KEYWORDS="*"
 LICENSE="MIT"
 SLOT="0"
-IUSE="+asm +glx gles egl"
+IUSE="+asm +glx +gles +egl"
 
 RDEPEND="
 	x11-libs/libX11[${MULTILIB_USEDEP}]
