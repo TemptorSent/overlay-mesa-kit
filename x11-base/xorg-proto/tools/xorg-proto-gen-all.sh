@@ -1,20 +1,23 @@
 #!/bin/sh
 
 OUTDIR="../../x11-proto"
-STUBREV="-r1000"
+STUBREV="-r1001"
 
 xp_manifest=""
 
 for eb in xorg-proto-*.ebuild ; do
-	ppkg="${eb/%.ebuild/}"
-	ppkg="${ppkg##*/}"
-	ppkgver="${ppkg#xorg-proto-}"
+	
+	ppkgr="${eb/%.ebuild/}"
+	ppkgf="${ppkgr##*/}"
+	ppkg="${ppkgf%-r*}"
+	ppkgverf="${ppkg#xorg-proto-}"
+	ppkgver="${ppkgverf%-r*}"
 	
 	# We only need to generate the manifest for xorg-proto once.
 	[ -z "$xp_manifest" ] && ( ebuild "${eb}" manifest 2>&1 ) > /dev/null && xp_manifest="${eb}"
 	ebuild "${eb}" clean unpack
 
-	pushd ~portage/x11-base/${ppkg}/work
+	pushd ~portage/x11-base/${ppkgf}/work
 		if [ -d "${ppkg}" ] ; then cd "${ppkg}"
 		elif [ -d "xorgproto-${ppkgver}" ] ; then cd "xorgproto-${ppkgver}"
 		else printf --  "Can't figure out location of sources for ${eb}, skipping!" ; continue ; fi
@@ -31,8 +34,8 @@ for eb in xorg-proto-*.ebuild ; do
 		mkdir -p "${protodir}"
 		protoebuild="${protodir}/${proto}${STUBREV}.ebuild"
 		# If we've already created the stub, add the current xorg-proto as a provider and continue from the top.
-		if [ -e "${protoebuild}" ] && ! grep -q "x11-base/${ppkg}" "${protoebuild}" ; then
-			printf -- "Adding ${ppkg} as provider to ebuild '${protoebuild}'.\n"
+		if [ -e "${protoebuild}" ] && ! grep -q "x11-base/${ppkgf}" "${protoebuild}" ; then
+			printf -- "Adding ${ppkgf} as provider to ebuild '${protoebuild}'.\n"
 			sed -e 's:RDEPEND=" || (:&\n\t=x11-base/'"${ppkg}:" -i "${protoebuild}"
 			continue
 		fi
@@ -51,7 +54,7 @@ KEYWORDS="*"
 SLOT="0"
 
 RDEPEND=" || (
-	=x11-base/${ppkg}[\${MULTILIB_USEDEP}]
+	=x11-base/${ppkgf}
 )"
 DEPEND="\${RDEPEND}"
 
@@ -86,10 +89,10 @@ EOF
 
 	sed -e '/LEGACY_DEPS="/,/"/ d ; /PDEPEND="/,/"/ d ' -i "${eb}"
 	printf -- "LEGACY_DEPS=\"" >> "${eb}"
-	for pl in ${al} ; do printf -- "\n\t=${pl}[\${MULTILIB_USEDEP}]" >> "${eb}" ; done
+	for pl in ${al} ; do printf -- "\n\t=${pl}" >> "${eb}" ; done
 	printf -- '"\n' >> "${eb}"
 	printf -- "PDEPEND=\"legacy? ( \${LEGACY_DEPS} )" >> "${eb}"
-	for p in ${a} ; do printf -- "\n\t=${p}[\${MULTILIB_USEDEP}]" >> "${eb}" ; done
+	for p in ${a} ; do printf -- "\n\t=${p}" >> "${eb}" ; done
 	printf -- '"\n' >> "${eb}"
 
 	ebuild "${eb}" manifest
