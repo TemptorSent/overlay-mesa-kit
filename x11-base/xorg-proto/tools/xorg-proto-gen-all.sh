@@ -36,7 +36,7 @@ for eb in xorg-proto-*.ebuild ; do
 		# If we've already created the stub, add the current xorg-proto as a provider and continue from the top.
 		if [ -e "${protoebuild}" ] && ! grep -q "x11-base/${ppkgf}" "${protoebuild}" ; then
 			printf -- "Adding ${ppkgf} as provider to ebuild '${protoebuild}'.\n"
-			sed -e 's:RDEPEND=" || (:&\n\t=x11-base/'"${ppkg}:" -i "${protoebuild}"
+			sed -e 's:RDEPEND=" || (:&\n\t=x11-base/'"${ppkgf}:" -i "${protoebuild}"
 			continue
 		fi
 		printf -- "Writing stub ebuild '${protoebuild}.'\n"
