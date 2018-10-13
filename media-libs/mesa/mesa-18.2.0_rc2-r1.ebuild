@@ -378,7 +378,7 @@ multilib_src_configure() {
 	fi
 
 	if use video_cards_i965 || use video_cards_i915 ; then
-		tool_enble intel
+		tool_enable intel
 	fi
 
 
