@@ -548,7 +548,7 @@ multilib_src_configure() {
 	
 	#if tc-is-cross-compiler || [[ ${ABI} != ${DEFAULT_ABI-${ABI}} ]]; then
 			_meson_create_cross_file || die "unable to write meson cross file"
-			meson_cross=( --cross-file "${T}/meson.$(get_abi_CHOST).${ABI}" )
+			meson_cross=( --cross-file "${T}/meson.${CHOST}.${ABI}" )
 	#fi
 
 	# https://bugs.gentoo.org/625396
