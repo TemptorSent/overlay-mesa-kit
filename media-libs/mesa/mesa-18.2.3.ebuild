@@ -282,14 +282,9 @@ DEPEND="${RDEPEND}
 	sys-devel/gettext
 	virtual/pkgconfig
 	valgrind? ( dev-util/valgrind )
-	vulkan? (
-		$(python_gen_any_dep ">=dev-python/mako-0.7.3[\${PYTHON_USEDEP}]")
-	)
-"
-[[ ${PV} == 9999 ]] && DEPEND+="
 	sys-devel/bison
 	sys-devel/flex
-	$(python_gen_any_dep ">=dev-python/mako-0.7.3[\${PYTHON_USEDEP}]")
+	$(python_gen_any_dep ">=dev-python/mako-1.0.7[\${PYTHON_USEDEP}]")
 "
 
 S="${WORKDIR}/${MY_P}"
