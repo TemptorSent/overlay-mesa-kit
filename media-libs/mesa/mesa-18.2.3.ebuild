@@ -274,7 +274,7 @@ RDEPEND="${RDEPEND}
 unset {LLVM,CLANG}_DEPSTR{,_AMDGPU}
 
 DEPEND="${RDEPEND}
-	>=dev-util/meson-0.47.1
+	>=dev-util/meson-0.48.1
 	${PYTHON_DEPS}
 	opencl? (
 		>=sys-devel/gcc-4.6
