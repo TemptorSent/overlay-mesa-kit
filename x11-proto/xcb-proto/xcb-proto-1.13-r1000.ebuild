@@ -1,7 +1,9 @@
 # Distributed under the terms of the GNU General Public License v2
 EAPI=6
 
-inherit multilib-minimal
+PYTHON_COMPAT=( python2_7 python3_{4,5,6,7} )
+
+inherit python-r1 multilib-minimal
 
 DESCRIPTION="x11-proto/xcb-proto package stub (provided by xcb-proto)."
 
@@ -9,7 +11,7 @@ KEYWORDS="*"
 
 SLOT="0"
 
-RDEPEND="=x11-base/xcb-proto-1.13[${MULTILIB_USEDEP}]"
+RDEPEND="=x11-base/xcb-proto-1.13[${PYTHON_USEDEP},${MULTILIB_USEDEP}]"
 DEPEND="${RDEPEND}"
 
 S="${WORKDIR}"
