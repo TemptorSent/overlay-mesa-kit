@@ -414,7 +414,9 @@ multilib_src_configure() {
 		$(mesa_option_string dri-drivers-path "${MESA_DRI_DRIVERS_PATH}")
 		$(mesa_option_string dri-search-path "${MESA_DRI_SEARCH_PATH}")
 
-		$(mesa_option_array mesa_gallium-drivers ${IUSE_MESA_GALLIUM_DRIVERS})
+		# SWR only builds for 64 bit.
+		$(mesa_option_array mesa_gallium-drivers ${IUSE_MESA_GALLIUM_DRIVERS} | ( if [[ ${ABI} == x86 ]] ; then  sed -e 's/,\?swr\b//g' ; else  cat ; fi ) )
+
 		$(mesa_option_boolean mesa_gallium-extra-hud)
 
 		$(mesa_option_autobool mesa_gallium-vdpau)
@@ -426,12 +428,15 @@ multilib_src_configure() {
 		$(mesa_option_autobool mesa_gallium-va)
 		$(mesa_option_string mesa_va-libs-path "${MESA_VA_LIBS_PATH}")
 		$(mesa_option_autobool mesa_gallium-xa)
+
 		$(mesa_option_combo mesa_gallium-opencl disabled ${IUSE_MESA_GALLIUM_OPENCL})
 		$(mesa_option_boolean mesa_gallium-nine)
 		$(mesa_option_string mesa_d3d-drivers-path "${MESA_D3D_DRIVERS_PATH}")
+
 		$(mesa_option_array mesa_vulkan-drivers ${IUSE_MESA_VULKAN_DRIVERS})
 		$(mesa_option_boolean mesa_shader-cache)
 		$(mesa_option_string mesa_vulcan-icd-dir "${MESA_VULCAN_ICD_DIR}")
+
 		$(mesa_option_boolean mesa_shared-glapi)
 		$(mesa_option_boolean mesa_gles1)
 		$(mesa_option_boolean mesa_gles2)
@@ -440,35 +445,34 @@ multilib_src_configure() {
 		$(mesa_option_combo mesa_glx disabled ${IUSE_MESA_GLX})
 		$(mesa_option_autobool mesa_egl)
 		$(mesa_option_boolean mesa_glvnd)
-	)
-	# x86 hardened pax_kernel needs glx-rts, bug 240956
-	if [[ ${ABI} == x86 ]]; then
-		emesonargs+=( $(meson_use pax_kernel glx-read-only-text) )
-	else
-		emesonargs+=( $(mesa_option_boolean mesa_glx-read-only-text) )
-	fi
-	# on abi_x86_32 hardened we need to have asm disable
-	if [[ ${ABI} == x86* ]] && use pic; then
-		emesonargs+=( -Dasm=false )
-	else
-		emesonargs+=( $(mesa_option_boolean mesa_asm ) )
-	fi
-	emesonargs+=(
+
+		# x86 hardened pax_kernel needs glx-rts, bug 240956
+		$( if [[ ${ABI} == x86 ]] ; then  meson_use pax_kernel glx-read-only-text ; else  mesa_option_boolean mesa_glx-read-only-text ; fi )
+
+		# on abi_x86_32 hardened we need to have asm disable
+		$( if [[ ${ABI} == x86* ]] && use pic ; then printf -- '-Dasm=false' ; else  mesa_option_boolean mesa_asm ; fi )
+
 		$(mesa_option_autobool mesa_llvm)
 		$(mesa_option_boolean mesa_shared-llvm)
+
 		$(mesa_option_autobool mesa_valgrind)
 		$(mesa_option_autobool mesa_libunwind)
 		$(mesa_option_autobool mesa_lmsensors)
+
 		$(mesa_option_boolean mesa_build-tests)
+
 		$(mesa_option_combo mesa_osmesa none ${IUSE_MESA_OSMESA})
 		$(mesa_option_combo mesa_osmesa-bits 8 ${IUSE_MESA_OSMESA_BITS})
+
 		$(mesa_option_array mesa_swr-arches ${IUSE_MESA_SWR_ARCHES})
+
 		$(mesa_option_array mesa_tools ${IUSE_MESA_TOOLS})
+
 		$(mesa_option_boolean mesa_power8)
+
 		$(mesa_option_autobool mesa_xlib-lease)
 		$(mesa_option_boolean mesa_glx-direct)
-	)
-	emesonargs+=(
+
 		--buildtype $(usex debug debug plain)
 		-Db_ndebug=$(usex debug false true)
 	)
