@@ -11,7 +11,7 @@ KEYWORDS="*"
 
 SLOT="0"
 
-RDEPEND="=x11-base/xcb-proto-1.13[${PYTHON_USEDEP},${MULTILIB_USEDEP}]"
+RDEPEND="=x11-base/xcb-proto-1.13[${MULTILIB_USEDEP}]"
 DEPEND="${RDEPEND}"
 
 S="${WORKDIR}"
