@@ -10,8 +10,10 @@ for eb in xcb-proto-*.ebuild ; do
 	ppkg="${eb/%.ebuild/}"
 	ppkg="${ppkg##*/}"
 	ppkgver="${ppkg#xcb-proto-}"
-	if ! [ -f "../../x11-libs/libxcb/libxcb-${ppkgver}.ebuild" ] ; then
-		echo "Matching library x11-libs/libxcb-${ppkgver} does not exist! Bailing out!"
+	xcbebpre="../../x11-libs/libxcb/libxcb-${ppkgver}"
+	xcbeblst="$(echo $"{xcbebpre}"*.ebuild)"
+	if [ "${xcbebpre}*.ebuild" = "${xcbeblst}" ] ; then
+		echo "Matching library x11-libs/libxcb-${ppkgver}* does not exist! Bailing out!"
 		exit 1
 	fi
 	proto="${ppkg}"
@@ -36,7 +38,7 @@ KEYWORDS="*"
 
 SLOT="0"
 
-RDEPEND="=x11-base/${ppkg}[\${PYTHON_USEDEP},\${MULTILIB_USEDEP}]"
+RDEPEND="=x11-base/${ppkg}[\${MULTILIB_USEDEP}]"
 DEPEND="\${RDEPEND}"
 
 S="\${WORKDIR}"
