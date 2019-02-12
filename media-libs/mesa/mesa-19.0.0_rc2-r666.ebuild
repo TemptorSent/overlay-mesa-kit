@@ -145,7 +145,7 @@ IUSE_MESA_OSMESA="mesa_osmesa_classic +mesa_osmesa_gallium"
 # Note, must be 8 bits per channel for normal usage. Others require building non glx, non dri osmesa lib.
 IUSE_MESA_OSMESA_BITS="+mesa_osmesa-bits_8 mesa_osmesa-bits_16 mesa_osmesa-bits_32"
 IUSE_MESA_SWR_ARCHES="mesa_swr-arches_avx mesa_swr-arches_avx2 mesa_swr-arches_knl mesa_swr-arches_skx"
-IUSE_MESA_TOOLS="mesa_tools_etnaviv mesa_tools_freedreno mesa_tools_glsl mesa_tools_intel mesa_tools_intel_ui mesa_tools_nir mesa_tools_nouveau mesa_tools_xvmc mesa_tools_all"
+IUSE_MESA_TOOLS="mesa_tools_etnaviv mesa_tools_freedreno mesa_tools_glsl mesa_tools_intel mesa_tools_intel-ui mesa_tools_nir mesa_tools_nouveau mesa_tools_xvmc mesa_tools_all"
 IUSE_MESA_POWER8="mesa_power8_auto mesa_power8"
 IUSE_MESA_XLIB_LEASE="mesa_xlib-lease_auto +mesa_xlib-lease"
 IUSE_MESA_GLX_DIRECT="+mesa_glx-direct"
