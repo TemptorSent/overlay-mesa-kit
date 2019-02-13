@@ -259,7 +259,7 @@ RDEPEND="
 	mesa_xlib-lease? ( >=x11-libs/libXrandr-1.3:=[${MULTILIB_USEDEP}] )
 	mesa_lmsensors? ( sys-apps/lm_sensors:=[${MULTILIB_USEDEP}] )
 	mesa_libunwind? ( sys-libs/libunwind[${MULTILIB_USEDEP}] )
-	mesa_glvnd? ( sys-libs/libglvd[${MULTILIB_USEDEP}] )
+	mesa_glvnd? ( sys-libs/libglvnd[${MULTILIB_USEDEP}] )
 "
 RDEPEND="${RDEPEND}
 
