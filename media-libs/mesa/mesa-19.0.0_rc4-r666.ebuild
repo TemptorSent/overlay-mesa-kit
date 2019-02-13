@@ -107,7 +107,7 @@ IUSE_MESA_DRI3="mesa_dri3_auto +mesa_dri3"
 # option( 'dri-drivers', type : 'array', value : ['auto'],
 # choices : ['', 'auto', 'i915', 'i965', 'r100', 'r200', 'nouveau', 'swrast'],
 # description : 'List of dri drivers to build. If this is set to auto all drivers applicable to the target OS/architecture will be built' )
-IUSE_MESA_DRI_DRIVERS="mesa_dri-drivers_auto mesa_dri-drivers_i915 mesa_dri-drivers_i965 mesa-dri_drivers_r100 mesa_dri-drivers_r200 mesa_dri-drivers_nouveau mesa_dri-drivers_swrast"
+IUSE_MESA_DRI_DRIVERS="mesa_dri-drivers_auto mesa_dri-drivers_i915 mesa_dri-drivers_i965 mesa_dri-drivers_r100 mesa_dri-drivers_r200 mesa_dri-drivers_nouveau mesa_dri-drivers_swrast"
 
 # option( 'gallium-drivers', type : 'array', value : ['auto'],
 # choices : [ '', 'auto', 'kmsro', 'radeonsi', 'r300', 'r600', 'nouveau', 'freedreno', 'swrast', 'v3d', 'vc4', 'etnaviv', 'tegra', 'i915', 'svga', 'virgl', 'swr', ],
@@ -214,7 +214,7 @@ MESA_DEP_OMX_TIZONIA_VERSION='>= 0.10.0'
 MESA_DEP_VA_VERSION='>= 0.38.0' # This is API version, found in libva 1.6.0
 
 MESA_DEP_DRM_AMDGPU_VER='2.4.97'
-MESA_DEP_DRM_RADEOM_VER='2.4.71'
+MESA_DEP_DRM_RADEON_VER='2.4.71'
 MESA_DEP_DRM_NOUVEAU_VER='2.4.66'
 MESA_DEP_DRM_ETNAVIV_VER='2.4.89'
 MESA_DEP_DRM_INTEL_VER='2.4.75'
@@ -259,7 +259,7 @@ RDEPEND="
 	mesa_xlib-lease? ( >=x11-libs/libXrandr-1.3:=[${MULTILIB_USEDEP}] )
 	mesa_lmsensors? ( sys-apps/lm_sensors:=[${MULTILIB_USEDEP}] )
 	mesa_libunwind? ( sys-libs/libunwind[${MULTILIB_USEDEP}] )
-	mesa_glvd? ( sys-libs/libglvd[${MULTILIB_USEDEP}] )
+	mesa_glvnd? ( sys-libs/libglvd[${MULTILIB_USEDEP}] )
 "
 RDEPEND="${RDEPEND}
 
