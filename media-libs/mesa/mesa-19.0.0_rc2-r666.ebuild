@@ -243,7 +243,7 @@ LIBDRM_RDEPEND="
 	mesa_gallium-drivers_freedreno? ( ${LIBDRM_DEPSTRING}-${MESA_DEP_DRM_VER}[video_cards_freedreno,${MULTILIB_USEDEP}] )
 "
 
-RDEPED="
+RDEPNED="
 	${LIBDRM_RDEPEND}
 	!app-eselect/eselect-mesa
 	>=app-eselect/eselect-opengl-1.3.0
