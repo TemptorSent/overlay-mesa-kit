@@ -160,9 +160,9 @@ IUSE="${IUSE_MESA_PLATFORMS} ${IUSE_MESA_DRI3} ${IUSE_MESA_DRI_DRIVERS} ${IUSE_M
 	${IUSE_MESA_ASM} ${IUSE_MESA_GLX_READ_ONLY_TEXT} ${IUSE_MESA_LLVM} ${IUSE_MESA_SHARED_LLVM} ${IUSE_MESA_VALGRIND} ${IUSE_MESA_LIBUNWIND}
 	${IUSE_MESA_LMSENSORS} ${IUSE_MESA_BUILD_TESTS} ${IUSE_MESA_SELINUX} ${IUSE_MESA_OSMESA} ${IUSE_MESA_OSMESA_BITS} ${IUSE_MESA_SWR_ARCHES}
 	${IUSE_MESA_TOOLS} ${IUSE_MESA_POWER8} ${IUSE_MESA_XLIB_LEASE} ${IUSE_MESA_GLX_DIRECT}
-	+classic d3d9 debug +dri3 +egl +gallium +gbm gles1 gles2 +llvm lm_sensors
-	opencl osmesa pax_kernel pic selinux test unwind vaapi valgrind vdpau
-	vulkan wayland xa xvmc"
+	+classic d3d9 debug +dri3 +egl +gallium +gbm +glvnd +gles1 +gles2 +llvm lm_sensors
+	opencl +osmesa pax_kernel pic selinux test +unwind vaapi valgrind vdpau
+	vulkan +wayland xa xvmc"
 
 REQUIRED_USE="
 	mesa_gallium-nine? (
