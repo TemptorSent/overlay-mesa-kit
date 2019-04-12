@@ -36,7 +36,7 @@ fi
 KEYWORDS="*"
 LICENSE="MIT"
 SLOT="0"
-IUSE="+asm +glx +gles +egl"
+IUSE="+asm +glx +gles +egl debug"
 
 RDEPEND="
 	x11-libs/libX11[${MULTILIB_USEDEP}]
@@ -45,9 +45,13 @@ RDEPEND="
 "
 
 DEPEND="
-	!media-libs/mesa[-glvnd(-)]
 	${PYTHON_DEPS}
 	${RDEPEND}
+"
+
+RDEPEND="
+	${RDEPEND}
+	!media-libs/mesa[-glvnd(-)]
 "
 
 src_unpack() {
@@ -61,12 +65,15 @@ src_prepare() {
 }
 
 multilib_src_configure() {
-	ECONF_SOURCE=${S} econf $(use_enable asm) $(use_enable glx) $(use_enable gles) $(use_enable egl)
+	ECONF_SOURCE=${S} econf $(usex debug "--enable-debug" "") $(usex asm "" "--disable-asm") $(usex glx "" "--disable-glx") $(usex gles "" "--disable-gles") $(usex egl "" "--disable-egl")
 }
 
 multilib_src_install() {
 	default
-	# libglvnd should replace existing Mesa gl if present
-	PKGCONF_PATH="${ED}/usr/$(get_libdir)/pkgconfig"
 	find "${ED}" -name '*.la' -delete || die
 }
+
+multilib_src_test() {
+	emake check
+}
+
