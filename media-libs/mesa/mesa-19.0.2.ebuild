@@ -335,7 +335,7 @@ pkg_setup() {
 }
 
 src_prepare() {
-	if ! [ "$(cd "$FILESDIR" && echo "${P}"-*.patch)" = "${P}"'-*.patch' ] ; then
+	if [ -d "${FILESDIR}" ] && [ "$(cd "$FILESDIR" && echo "${P}"-*.patch)" != "${P}"'-*.patch' ] ; then
 		eapply "${FILESDIR}/${P}"-*.patch
 	fi
 	[[ ${PV} == 9999 ]] && eautoreconf
