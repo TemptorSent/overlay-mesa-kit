@@ -225,7 +225,7 @@ RDEPEND="${RDEPEND}
 # 1. List all the working slots (with min versions) in ||, newest first.
 # 2. Update the := to specify *max* version, e.g. < 7.
 # 3. Specify LLVM_MAX_SLOT, e.g. 6.
-LLVM_MAX_SLOT=8
+#LLVM_MAX_SLOT=8
 LLVM_DEPSTR="
 	|| (
 		sys-devel/llvm:8[${MULTILIB_USEDEP}]
@@ -486,6 +486,8 @@ multilib_src_configure() {
 
 		-Dgallium-va=$(usex vaapi true false)
 		$(use vaapi && printf -- "-Dva-libs-path=${my_libdir}/va/drivers")
+
+		-Dgallium-xa=$(usex xa true false)
 
 		-Dgallium-nine=$(usex d3d9 true false)
 		#$(use d3d9 && printf -- "-Dd3d-drivers-path=${my_prefix}/d3d")
