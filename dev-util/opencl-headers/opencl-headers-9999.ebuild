@@ -8,7 +8,8 @@ if [[ "${PV}" == "9999" ]]; then
 	inherit git-r3
 else
 	case "${PV}" in
-		20190412) EGIT_COMMIT="745c724b4ac623b1c42044454cb867e537d3917e"
+		20190412) EGIT_COMMIT="745c724b4ac623b1c42044454cb867e537d3917e" ;;
+		20190502) EGIT_COMMIT="c5a4bbeabb10d8ed3d1c651b93aa31737bc473dd" ;;
 	esac
 	
 	KEYWORDS="~amd64"
