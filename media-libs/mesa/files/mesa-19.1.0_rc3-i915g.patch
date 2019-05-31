@@ -1,0 +1,81 @@
+diff -ur mesa-19.1.0-rc3/meson.build mesa-19.1.0-rc3-i915-hack/meson.build
+--- mesa-19.1.0-rc3/meson.build	2019-05-21 14:18:50.000000000 -0000
++++ mesa-19.1.0-rc3-i915-hack/meson.build	2019-05-26 20:46:55.326367783 -0000
+@@ -232,9 +232,9 @@
+ if with_dri_swrast and (with_gallium_softpipe or with_gallium_swr)
+   error('Only one swrast provider can be built')
+ endif
+-if with_dri_i915 and with_gallium_i915
+-  error('Only one i915 provider can be built')
+-endif
++#if with_dri_i915 and with_gallium_i915
++#  error('Only one i915 provider can be built')
++#endif
+ if with_gallium_kmsro and not (with_gallium_v3d or with_gallium_vc4 or with_gallium_etnaviv or with_gallium_freedreno or with_gallium_panfrost or with_gallium_lima)
+   error('kmsro driver requires one or more renderonly drivers (vc4, etnaviv, freedreno, panfrost, lima)')
+ endif
+diff -ur mesa-19.1.0-rc3/src/gallium/drivers/i915/meson.build mesa-19.1.0-rc3-i915-hack/src/gallium/drivers/i915/meson.build
+--- mesa-19.1.0-rc3/src/gallium/drivers/i915/meson.build	2019-05-21 14:18:51.000000000 -0000
++++ mesa-19.1.0-rc3-i915-hack/src/gallium/drivers/i915/meson.build	2019-05-26 20:46:55.526367783 -0000
+@@ -18,7 +18,7 @@
+ # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ # SOFTWARE.
+ 
+-files_i915 = files(
++files_i915g = files(
+   'i915_batchbuffer.h',
+   'i915_batch.h',
+   'i915_blit.c',
+@@ -62,14 +62,14 @@
+   'i915_winsys.h',
+ )
+ 
+-libi915 = static_library(
+-  'i915',
+-  files_i915,
++libi915g = static_library(
++  'i915g',
++  files_i915g,
+   c_args : [c_vis_args],
+   include_directories : [inc_include, inc_src, inc_gallium, inc_gallium_aux],
+ )
+ 
+-driver_i915 = declare_dependency(
++driver_i915g = declare_dependency(
+   compile_args : '-DGALLIUM_I915',
+-  link_with : [libi915, libi915drm],
++  link_with : [libi915g, libi915drm],
+ )
+diff -ur mesa-19.1.0-rc3/src/gallium/targets/dri/meson.build mesa-19.1.0-rc3-i915-hack/src/gallium/targets/dri/meson.build
+--- mesa-19.1.0-rc3/src/gallium/targets/dri/meson.build	2019-05-21 14:18:51.000000000 -0000
++++ mesa-19.1.0-rc3-i915-hack/src/gallium/targets/dri/meson.build	2019-05-26 20:46:55.618367783 -0000
+@@ -57,7 +57,7 @@
+     dep_selinux, dep_expat, dep_libdrm, dep_llvm, dep_thread,
+     driver_swrast, driver_r300, driver_r600, driver_radeonsi, driver_nouveau,
+     driver_kmsro, driver_v3d, driver_vc4, driver_freedreno, driver_etnaviv,
+-    driver_tegra, driver_i915, driver_svga, driver_virgl,
++    driver_tegra, driver_i915g, driver_svga, driver_virgl,
+     driver_swr, driver_panfrost, driver_iris, driver_lima
+   ],
+   # Will be deleted during installation, see install_megadrivers.py
+@@ -93,7 +93,7 @@
+              [with_gallium_etnaviv, 'etnaviv_dri.so'],
+              [with_gallium_tegra, 'tegra_dri.so'],
+              [with_gallium_iris, 'iris_dri.so'],
+-             [with_gallium_i915, 'i915_dri.so'],
++             [with_gallium_i915, 'i915g_dri.so'],
+              [with_gallium_r300, 'r300_dri.so'],
+              [with_gallium_r600, 'r600_dri.so'],
+              [with_gallium_svga, 'vmwgfx_dri.so'],
+diff -ur mesa-19.1.0-rc3/src/gallium/targets/xa/meson.build mesa-19.1.0-rc3-i915-hack/src/gallium/targets/xa/meson.build
+--- mesa-19.1.0-rc3/src/gallium/targets/xa/meson.build	2019-05-21 14:18:51.000000000 -0000
++++ mesa-19.1.0-rc3-i915-hack/src/gallium/targets/xa/meson.build	2019-05-26 20:46:55.622367783 -0000
+@@ -48,7 +48,7 @@
+   ],
+   link_depends : xa_link_depends,
+   dependencies : [
+-    dep_thread, driver_nouveau, driver_i915, driver_svga, driver_freedreno,
++    dep_thread, driver_nouveau, driver_i915g, driver_svga, driver_freedreno,
+   ],
+   version : _xa_version,
+   install : true,
