@@ -62,7 +62,7 @@ IUSE_DRIVER_OPTS="i915_classic_driver swrast_classic_driver nouveau_classic_driv
 
 IUSE_GL="+glvnd +opengl +glx +egl +gles1 +gles2"
 IUSE_PLATFORMS="+X +drm wayland +surfaceless android haiku"
-IUSE_VULKAN="+vulkan +xlib_lease"
+IUSE_VULKAN="vulkan +xlib_lease"
 IUSE_CL="opencl +ocl-icd"
 IUSE_MEDIA="vaapi vdpau xvmc xa openmax"
 
